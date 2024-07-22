@@ -33,10 +33,10 @@ namespace CTFServerSide.Services
             return true;
         }
 
-        public string Login(UserDTO userDto)
+        public string Login(LoginDTO loginDto)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == userDto.Username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(userDto.Password, user.Password))
+            var user = _context.Users.SingleOrDefault(u => u.Email == loginDto.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             {
                 return null;
             }

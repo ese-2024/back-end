@@ -25,9 +25,9 @@ namespace CTFServerSide.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(UserDTO userDto)
+        public IActionResult Login(LoginDTO loginDto)
         {
-            var token = _authService.Login(userDto);
+            var token = _authService.Login(loginDto);
             if (token != null)
                 return Ok(new { Token = token });
             return Unauthorized("Invalid credentials");
