@@ -1,13 +1,17 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configurar serviços da aplicação
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Adicionar configuração do Startup
+var startup = new Startup(builder.Configuration);
+startup.ConfigureServices(builder.Services);
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configurar o pipeline de requisições HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -15,19 +19,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Configurar o CORS
 app.UseCors(options =>
 {
-    options.AllowAnyOrigin(); // Permitir requisi��es de qualquer origem
-    options.AllowAnyMethod(); // Permitir requisi��es de qualquer m�todo (GET, POST, etc.)
-    options.AllowAnyHeader(); // Permitir quaisquer cabe�alhos na requisi��o
+    options.AllowAnyOrigin(); // Permitir requisições de qualquer origem
+    options.AllowAnyMethod(); // Permitir requisições de qualquer método (GET, POST, etc.)
+    options.AllowAnyHeader(); // Permitir quaisquer cabeçalhos na requisição
 });
 
 app.MapControllers();
+
+// Configurar a aplicação no Startup
+startup.Configure(app, app.Environment);
 
 app.Run();
