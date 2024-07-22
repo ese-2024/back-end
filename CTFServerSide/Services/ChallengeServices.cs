@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CTFServerSide.Data;
 using CTFServerSide.DTOs;
+using CTFServerSide.Models;
 
 namespace CTFServerSide.Services
 {

@@ -1,3 +1,5 @@
+using CTFServerSide.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar serviços da aplicação
@@ -36,5 +38,19 @@ app.MapControllers();
 
 // Configurar a aplicação no Startup
 startup.Configure(app, app.Environment);
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CTFContext>();
+    try
+    {
+        context.Database.EnsureCreated();
+        Console.WriteLine("Conexão com o banco de dados bem-sucedida.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
+    }
+}
 
 app.Run();

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using CTFServerSide.Data;
 using CTFServerSide.DTOs;
+using CTFServerSide.Models;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CTFServerSide.Services
