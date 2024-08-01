@@ -1,15 +1,17 @@
 using CTFServerSide.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CTFServerSide.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ChallengesController : ControllerBase
+    public class ChallengeController : ControllerBase
     {
         private readonly ChallengeService _challengeService;
 
-        public ChallengesController(ChallengeService challengeService)
+        public ChallengeController(ChallengeService challengeService)
         {
             _challengeService = challengeService;
         }
@@ -19,15 +21,6 @@ namespace CTFServerSide.Controllers
         {
             var challenges = _challengeService.GetChallenges();
             return Ok(challenges);
-        }
-
-        [HttpPost("{id}/submit")]
-        public IActionResult SubmitAnswer(int id, [FromBody] string answer)
-        {
-            var result = _challengeService.CheckAnswer(id, answer);
-            if (result)
-                return Ok("Correct answer!");
-            return BadRequest("Incorrect answer");
         }
     }
 }

@@ -1,7 +1,8 @@
-using System.Security.Claims;
 using CTFServerSide.Data;
 using CTFServerSide.DTOs;
-using CTFServerSide.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CTFServerSide.Services
 {
@@ -17,54 +18,47 @@ namespace CTFServerSide.Services
         public IEnumerable<ChallengeDTO> GetChallenges()
         {
             return _context
-                .Challenges.Select(c => new ChallengeDTO
+                .Challenges
+                .Include(c => c.NecessaryKnowledges)
+                .Include(c => c.Materials)
+                .Include(c => c.Quests)
+                    .ThenInclude(q => q.Steps)
+                .Select(c => new ChallengeDTO
                 {
                     Id = c.Id,
                     Title = c.Title,
-                    Description = c.Description
+                    Description = c.Description,
+                    Level = c.Level,
+                    NecessaryKnowledges = c.NecessaryKnowledges.Select(nk => new NecessaryKnowledgeDTO
+                    {
+                        Id = nk.Id,
+                        Knowledge = nk.Knowledge
+                    }).ToList(),
+                    Materials = c.Materials.Select(m => new MaterialDTO
+                    {
+                        Id = m.Id,
+                        Title = m.Title,
+                        Link = m.Link,
+                    }).ToList(),
+                    Quests = c.Quests.Select(q => new QuestDTO
+                    {
+                        Id = q.Id,
+                        Title = q.Title,
+                        Description = q.Description,
+                        IsCompleted = q.IsCompleted,
+                        Order = q.Order,
+                        Steps = q.Steps.Select(s => new StepDTO
+                        {
+                            Id = s.Id,
+                            Description = s.Description,
+                            ExpectedAnswer = s.ExpectedAnswer,
+                            Command = s.Command,
+                            IsCompleted = s.IsCompleted,
+                            Order = s.Order,
+                        }).ToList()
+                    }).ToList()
                 })
                 .ToList();
-        }
-
-        public bool CheckAnswer(int challengeId, string answer)
-        {
-            var challenge = _context.Challenges.Find(challengeId);
-            if (challenge == null)
-            {
-                return false;
-            }
-
-            var isCorrect = challenge.CorrectAnswer.Equals(
-                answer,
-                StringComparison.OrdinalIgnoreCase
-            );
-            if (isCorrect)
-            {
-                var userId = int.Parse(ClaimsPrincipal.Current.Identity.Name); // Assuming the user ID is stored in the JWT claims
-                var userChallenge = _context.UserChallenges.SingleOrDefault(uc =>
-                    uc.UserId == userId && uc.ChallengeId == challengeId
-                );
-                if (userChallenge == null)
-                {
-                    userChallenge = new UserChallenge
-                    {
-                        UserId = userId,
-                        ChallengeId = challengeId,
-                        IsCompleted = true,
-                        CompletedAt = DateTime.UtcNow
-                    };
-                    _context.UserChallenges.Add(userChallenge);
-                }
-                else
-                {
-                    userChallenge.IsCompleted = true;
-                    userChallenge.CompletedAt = DateTime.UtcNow;
-                    _context.UserChallenges.Update(userChallenge);
-                }
-                _context.SaveChanges();
-            }
-
-            return isCorrect;
         }
     }
 }

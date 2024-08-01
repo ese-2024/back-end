@@ -1,61 +1,65 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using CTFServerSide.Data;
 using CTFServerSide.DTOs;
 using CTFServerSide.Models;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
-namespace CTFServerSide.Services
+public class AuthService
 {
-    public class AuthService
+    private readonly CTFContext _context;
+    private readonly IConfiguration _configuration;
+
+    public AuthService(CTFContext context, IConfiguration configuration)
     {
-        private readonly CTFContext _context;
-        private readonly IConfiguration _configuration;
+        _context = context;
+        _configuration = configuration;
+    }
 
-        public AuthService(CTFContext context, IConfiguration configuration)
+    public bool Register(UserDTO userDto)
+    {
+        if (_context.Users.Any(u => u.UserName == userDto.UserName))
         {
-            _context = context;
-            _configuration = configuration;
+            return false; 
         }
 
-        public bool Register(UserDTO userDto)
+        var user = new User
         {
-            var user = new User
-            {
-                Username = userDto.Username,
-                Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-                Email = userDto.Email
-            };
+            UserName = userDto.UserName,
+            Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password)
+        };
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
-            return true;
+        _context.Users.Add(user);
+        _context.SaveChanges();
+        return true;
+    }
+
+
+    public string? Login(LoginDTO loginDto)
+    {
+        var user = _context.Users.SingleOrDefault(u => u.UserName == loginDto.UserName);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+        {
+            return null;
         }
 
-        public string Login(LoginDTO loginDto)
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            var user = _context.Users.SingleOrDefault(u => u.Email == loginDto.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+            Subject = new ClaimsIdentity(new[]
             {
-                return null;
-            }
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(
-                    new Claim[] { new Claim(ClaimTypes.Name, user.Id.ToString()) }
-                ),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
-                )
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
+                new Claim(ClaimTypes.Name, user.Id.ToString()),
+                new Claim("UserName", user.UserName)
+            }),
+            Expires = DateTime.UtcNow.AddDays(7),
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature
+            )
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }

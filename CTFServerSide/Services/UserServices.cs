@@ -20,10 +20,25 @@ namespace CTFServerSide.Services
                 {
                     ChallengeId = uc.ChallengeId,
                     ChallengeTitle = uc.Challenge.Title,
-                    IsCompleted = uc.IsCompleted,
-                    CompletedAt = uc.CompletedAt
+                    IsCompleted = uc.IsCompleted
                 })
                 .ToList();
+        }
+
+        public MeDTO? GetCurrentUser(int userId)
+        {
+            var meInfo = _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new MeDTO
+                {
+                    Id = u.Id,
+                    UserName = u.UserName,
+                    Score = u.Score,
+                    CompletedChallenges = u.UserChallenges.Count(uc => uc.IsCompleted)
+                })
+                .FirstOrDefault();
+
+            return meInfo;
         }
     }
 }
