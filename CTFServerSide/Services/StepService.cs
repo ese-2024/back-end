@@ -78,8 +78,17 @@ public class StepService
                     {
                         userChallenge.IsCompleted = true;
                     }
+
                     _context.SaveChanges();
                 }
+
+                // Update user's score based on the challenge level
+                var user = _context.Users.SingleOrDefault(u => u.Id == userId);
+                if (user != null)
+                {
+                    user.Score += challenge.Level * 100;
+                }
+                _context.SaveChanges();
             }
 
             return true; // Answer is correct and step is completed

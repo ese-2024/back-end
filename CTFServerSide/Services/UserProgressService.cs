@@ -52,6 +52,7 @@ public class UserProgressService
             {
                 Id = uq.QuestId,
                 Title = uq.Quest.Title,
+                IsCompleted = uq.IsCompleted,
                 Steps = uq.Quest.Steps.Select(s => new StepDTO
                 {
                     Id = s.Id,

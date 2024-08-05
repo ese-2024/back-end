@@ -9,12 +9,12 @@ namespace CTFServerSide.Data
         {
             // Seeds para Challenges
             modelBuilder.Entity<Challenge>().HasData(
-                new Challenge { Id = 1, Description = "", Title = "Nível 1: Navegação e Comandos Básicos", Level = 1 },
-                new Challenge { Id = 2, Description = "", Title = "Nível 2: Manipulação de Arquivos e Diretórios", Level = 2 },
-                new Challenge { Id = 3, Description = "", Title = "Nível 3: Permissões e Processos", Level = 3 },
-                new Challenge { Id = 4, Description = "", Title = "Nível 4: Ferramentas de Busca e Filtros", Level = 4 },
-                new Challenge { Id = 5, Description = "", Title = "Nível 5: Arquivos e Diretórios Avançados", Level = 5 },
-                new Challenge { Id = 6, Description = "", Title = "Nível 6: Redes e Segurança", Level = 6 }
+                new Challenge { Id = 1, Description = "", Title = "Navegação e Comandos Básicos", Level = 1 },
+                new Challenge { Id = 2, Description = "", Title = "Manipulação de Arquivos e Diretórios", Level = 2 },
+                new Challenge { Id = 3, Description = "", Title = "Permissões e Processos", Level = 3 },
+                new Challenge { Id = 4, Description = "", Title = "Ferramentas de Busca e Filtros", Level = 4 },
+                new Challenge { Id = 5, Description = "", Title = "Arquivos e Diretórios Avançados", Level = 5 },
+                new Challenge { Id = 6, Description = "", Title = "Redes e Segurança", Level = 6 }
             );
 
             // Seeds para Quests
